@@ -1,0 +1,24 @@
+{
+    "transmission" : {
+        "url" : "",
+        "userid" : "",
+        "passwd" : ""
+    },
+    "search" : [
+        {
+            "category" : "VARIETY",
+            "finds" : [
+                ["라디오스타","720P","NEXT"],
+                ["백종원","720P","NEXT"]
+            ],
+            "save" : "/Public/down/TV"
+        },
+        {
+            "category" : "DRAMA",
+            "finds" : [
+                ["부부의 세계","720P","NEXT"]
+            ],
+            "save" : "/Public/down/TV"
+        }
+    ]
+}

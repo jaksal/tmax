@@ -6,13 +6,12 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
 )
-
-const site = "https://torrentmax.net/max/VARIETY"
 
 var client = &http.Client{
 	Timeout: time.Second * 10,
@@ -27,39 +26,52 @@ var client = &http.Client{
 	},
 }
 
-func getList() error {
+// Item ...
+type Item struct {
+	ID    int
+	Title string
+	// Link  string
+}
+
+func getList(site string) ([]*Item, error) {
+	// log.Println("get list ", site)
 	res, err := client.Get(site)
 	if err != nil {
 		log.Println(err)
-		return err
+		return nil, err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+		log.Println("status code error", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("status code error %d %s", res.StatusCode, res.Status)
 	}
 
 	// Load the HTML document
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return nil, err
 	}
 
-	// Find the review items
+	var result []*Item
 	doc.Find(".list-item").Each(func(i int, s *goquery.Selection) {
 		// For each item found, get the band and title
-		fmt.Println("=================================================================")
-		id := s.Find(".wr-num").Text()
-		fmt.Println("id", id)
+		id, _ := strconv.Atoi(s.Find(".wr-num").Text())
+		//link, _ := s.Find(".wr-subject > a").Attr("href")
+		title := strings.TrimSpace(s.Find(".wr-subject > a").Text())
 
-		link, _ := s.Find(".wr-subject > a").Attr("href")
-		fmt.Println("link", link)
-		fmt.Println("title", strings.TrimSpace(s.Find(".wr-subject > a").Text()))
+		result = append(result, &Item{
+			ID:    id,
+			Title: title,
+			//Link:  link,
+		})
 	})
 
-	return nil
+	return result, nil
 }
 
-func getContents(site string) (string, error) {
+func getMagnet(site string) (string, error) {
+	// log.Println("get magnet", site)
 
 	res, err := client.Get(site)
 	if err != nil {
@@ -72,5 +84,4 @@ func getContents(site string) (string, error) {
 	}
 
 	return res.Header.Get("location"), nil
-
 }
