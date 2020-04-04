@@ -1,60 +1,37 @@
 package main
 
 import (
-	"fmt"
+	"io"
 	"log"
+	"os"
+
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 func main() {
-	log.Println("start tmax")
-
-	category := "VARIETY"
+	log.SetOutput(io.MultiWriter(&lumberjack.Logger{
+		Filename:   "tmax.log",
+		MaxSize:    100, // megabytes
+		MaxBackups: 3,
+		MaxAge:     28, //days
+	}, os.Stdout))
 
 	conf, err := loadConfig("conf.json")
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	log.Println("check tmax", conf)
+
 	// init db
-	if err := initDB(); err != nil {
+	if err := initDB("tmax.db"); err != nil {
 		log.Fatal(err)
 	}
 
 	// init transmission
-	if err := initTransmission(); err != nil {
+	if err := initTransmission(conf.Transmission.URL, conf.Transmission.UserID, conf.Transmission.Passwd); err != nil {
 		log.Fatal(err)
 	}
 
-	for _, s := range conf.Search {
-		items, err := getList("https://torrentmax.net/max/" + s.Category)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		for _, i := range items {
-			// 1. find
-
-			// 2. check db
-			if exist, err := existDB(i.Title); err != nil {
-				continue
-			} else {
-				if exist {
-					continue
-				}
-			}
-
-			// 3. get magnet link
-			link := fmt.Sprintf("https://torrentmax.net/link?bo_table=%s&wr_id=%d&no=1", category, i.ID)
-			magnet, err := getMagnet(link)
-			if err != nil {
-				continue
-			}
-			// 4. add transmission
-			if err := addMagnet(magnet, s.Save); err != nil {
-				continue
-			}
-			log.Println("get magnet", i, magnet)
-		}
-	}
-
+	tmaxWork(conf)
 }

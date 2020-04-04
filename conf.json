@@ -1,15 +1,15 @@
 {
     "transmission" : {
-        "url" : "",
-        "userid" : "",
-        "passwd" : ""
+        "url" : "192.168.1.77",
+        "userid" : "jaksal21",
+        "passwd" : "smell94"
     },
     "search" : [
         {
             "category" : "VARIETY",
             "finds" : [
                 ["라디오스타","720P","NEXT"],
-                ["백종원","720P","NEXT"]
+                ["스케치북","720P","NEXT"]
             ],
             "save" : "/Public/down/TV"
         },

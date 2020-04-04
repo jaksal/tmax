@@ -1,5 +1,10 @@
 package main
 
+import (
+	"encoding/json"
+	"io/ioutil"
+)
+
 // Config ...
 type Config struct {
 	Transmission struct {
@@ -11,9 +16,18 @@ type Config struct {
 		Category string     `json:"category"`
 		Finds    [][]string `json:"finds"`
 		Save     string     `json:"save"`
-	} `json:"search_items"`
+	} `json:"search"`
 }
 
 func loadConfig(path string) (*Config, error) {
-	return nil, nil
+	f, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var c Config
+	if err := json.Unmarshal(f, &c); err != nil {
+		return nil, err
+	}
+
+	return &c, nil
 }
