@@ -7,6 +7,8 @@ import (
 )
 
 func findStr(src string, fs [][]string) bool {
+	//log.Println("find...", src, fs)
+
 	upperSrc := strings.ToUpper(src)
 
 	// or check
@@ -22,11 +24,11 @@ func findStr(src string, fs [][]string) bool {
 		}(fo)
 
 		if exist {
-			//log.Println("match", src, fo)
+			// log.Println("match", src, fo)
 			return true
 		}
 	}
-	//log.Println("mismatch", src, fs)
+	// log.Println("mismatch", src, fs)
 	return false
 }
 
@@ -47,6 +49,8 @@ func tmaxWork(conf *Config) {
 				continue
 			}
 
+			// log.Println("check db ", i)
+
 			// 2. check db
 			if exist, err := existDB(i.Title); err != nil {
 				log.Println("db check error", err)
@@ -64,6 +68,8 @@ func tmaxWork(conf *Config) {
 			if err != nil {
 				continue
 			}
+			//log.Println("get link", link, magnet)
+
 			// 4. add transmission
 			if err := addMagnet(magnet, s.Save); err != nil {
 				continue

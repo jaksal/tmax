@@ -4,6 +4,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -16,7 +17,8 @@ func main() {
 		MaxAge:     28, //days
 	}, os.Stdout))
 
-	conf, err := loadConfig("conf.json")
+	cur, _ := os.Executable()
+	conf, err := loadConfig(filepath.Dir(cur) + "/conf.json")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +26,7 @@ func main() {
 	log.Println("check tmax", conf)
 
 	// init db
-	if err := initDB("tmax.db"); err != nil {
+	if err := initDB(filepath.Dir(cur) + "/tmax.db"); err != nil {
 		log.Fatal(err)
 	}
 
@@ -34,4 +36,5 @@ func main() {
 	}
 
 	tmaxWork(conf)
+	checkState()
 }

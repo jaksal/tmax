@@ -52,8 +52,10 @@ func getList(site string) ([]*Item, error) {
 	var result []*Item
 	doc.Find(".list-item").Each(func(i int, s *goquery.Selection) {
 		// For each item found, get the band and title
-		id, _ := strconv.Atoi(s.Find(".wr-num").Text())
-		//link, _ := s.Find(".wr-subject > a").Attr("href")
+		//id, _ := strconv.Atoi(s.Find(".wr-num").Text())
+		link, _ := s.Find(".wr-subject > a").Attr("href")
+		id, _ := strconv.Atoi(link[strings.LastIndex(link, "/")+1:])
+
 		title := strings.TrimSpace(s.Find(".wr-subject > a").Text())
 
 		result = append(result, &Item{
@@ -67,7 +69,7 @@ func getList(site string) ([]*Item, error) {
 }
 
 func getMagnet(site string) (string, error) {
-	// log.Println("get magnet", site)
+	//log.Println("get magnet", site)
 
 	res, err := client.Get(site)
 	if err != nil {

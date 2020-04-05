@@ -3,7 +3,7 @@ package main
 import "testing"
 
 func TestTransmission(t *testing.T) {
-	initTransmission()
+	initTransmission("", "", "")
 	err := checkState()
 	if err != nil {
 		t.Error(err)
