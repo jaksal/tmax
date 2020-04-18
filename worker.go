@@ -37,7 +37,7 @@ func tmaxWork(conf *Config) {
 
 	for _, s := range conf.Search {
 
-		items, err := getList("https://torrentmax.net/max/" + s.Category)
+		items, err := getList("https://torrentmax.gg/max/" + s.Category)
 		if err != nil {
 			log.Println("get board list error", err)
 			return
@@ -63,7 +63,7 @@ func tmaxWork(conf *Config) {
 			}
 
 			// 3. get magnet link
-			link := fmt.Sprintf("https://torrentmax.net/link?bo_table=%s&wr_id=%d&no=1", s.Category, i.ID)
+			link := fmt.Sprintf("https://torrentmax.gg/link?bo_table=%s&wr_id=%d&no=1", s.Category, i.ID)
 			magnet, err := getMagnet(link)
 			if err != nil {
 				continue

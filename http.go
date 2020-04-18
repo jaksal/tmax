@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/cookiejar"
 	"strconv"
 	"strings"
 	"time"
@@ -12,14 +13,24 @@ import (
 	"github.com/PuerkitoBio/goquery"
 )
 
-var client = &http.Client{
-	Transport: &http.Transport{
-		MaxIdleConnsPerHost: 1024,
-	},
-	Timeout: time.Duration(60) * time.Second,
-	CheckRedirect: func(req *http.Request, via []*http.Request) error {
-		return http.ErrUseLastResponse
-	},
+var client *http.Client
+
+func init() {
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+	client = &http.Client{
+		Transport: &http.Transport{
+			MaxIdleConnsPerHost: 1024,
+		},
+		Timeout: time.Duration(60) * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+		Jar: jar,
+	}
+
 }
 
 // Item ...
@@ -30,13 +41,18 @@ type Item struct {
 }
 
 func getList(site string) ([]*Item, error) {
-	// log.Println("get list ", site)
-	res, err := client.Get(site)
+
+	req, err := http.NewRequest("GET", site, nil)
 	if err != nil {
-		log.Println(err)
+		return nil, err
+	}
+
+	res, err := client.Do(req)
+	if err != nil {
 		return nil, err
 	}
 	defer res.Body.Close()
+
 	if res.StatusCode != 200 {
 		log.Println("status code error", res.StatusCode, res.Status)
 		return nil, fmt.Errorf("status code error %d %s", res.StatusCode, res.Status)
@@ -61,7 +77,7 @@ func getList(site string) ([]*Item, error) {
 		result = append(result, &Item{
 			ID:    id,
 			Title: title,
-			//Link:  link,
+			//Link"," link,
 		})
 	})
 
