@@ -6,9 +6,11 @@ import (
 	"testing"
 )
 
+const site = "https://torrentmax.gg"
+
 func TestGetList(t *testing.T) {
 
-	items, err := getList("https://torrentmax.gg/max/DRAMA")
+	items, err := getList(site + "/max/DRAMA")
 	if err != nil {
 		t.Fatal("get board list error", err)
 
@@ -21,7 +23,7 @@ func TestGetLink(t *testing.T) {
 	category := "DRAMA"
 	id := 12119
 
-	link := fmt.Sprintf("https://torrentmax.gg/link?bo_table=%s&wr_id=%d&no=1", category, id)
+	link := fmt.Sprintf(site+"/link?bo_table=%s&wr_id=%d&no=1", category, id)
 	magnet, err := getMagnet(link)
 	if err != nil {
 		t.Error(err)
@@ -31,7 +33,7 @@ func TestGetLink(t *testing.T) {
 }
 
 func TestParseLink(t *testing.T) {
-	link := "https://torrentmax.gg/max/DRAMA/12147"
+	link := site + "/max/DRAMA/12147"
 
 	t.Log(link[strings.LastIndex(link, "/")+1:])
 

@@ -12,6 +12,7 @@ type Config struct {
 		UserID string `json:"userid"`
 		Passwd string `json:"passwd"`
 	} `json:"transmission"`
+	Site   string `json:"site"`
 	Search []struct {
 		Category string     `json:"category"`
 		Finds    [][]string `json:"finds"`
