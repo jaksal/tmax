@@ -2,42 +2,46 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
+	"strconv"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
-func findStr(src string, fs [][]string) bool {
-	//log.Println("find...", src, fs)
-
-	upperSrc := strings.ToUpper(src)
-
-	// or check
-	for _, fo := range fs {
-		// and check..
-		exist := func(fas []string) bool {
-			for _, s := range fas {
-				if !strings.Contains(upperSrc, strings.ToUpper(s)) {
-					return false
-				}
-			}
-			return true
-		}(fo)
-
-		if exist {
-			// log.Println("match", src, fo)
-			return true
-		}
-	}
-	// log.Println("mismatch", src, fs)
-	return false
-}
-
-func tmaxWork(conf *Config) {
+func torrentmaxWork(conf *Config) {
 	//log.Println("check start", conf)
 
 	for _, s := range conf.Search {
 
-		items, err := getList(conf.Site + "/max/" + s.Category)
+		items, err := getList(conf.Site+"/max/"+s.Category, func(body io.Reader) ([]*Item, error) {
+
+			// Load the HTML document
+			doc, err := goquery.NewDocumentFromReader(body)
+			if err != nil {
+				log.Println(err)
+				return nil, err
+			}
+
+			var result []*Item
+			doc.Find(".list-item").Each(func(i int, s *goquery.Selection) {
+				// For each item found, get the band and title
+				//id, _ := strconv.Atoi(s.Find(".wr-num").Text())
+				link, _ := s.Find(".wr-subject > a").Attr("href")
+				id, _ := strconv.Atoi(link[strings.LastIndex(link, "/")+1:])
+
+				title := strings.TrimSpace(s.Find(".wr-subject > a").Text())
+
+				result = append(result, &Item{
+					ID:    id,
+					Title: title,
+					//Link"," link,
+				})
+			})
+
+			return result, nil
+		})
 		if err != nil {
 			log.Println("get board list error", err)
 			return
@@ -64,7 +68,7 @@ func tmaxWork(conf *Config) {
 
 			// 3. get magnet link
 			link := fmt.Sprintf("%s/link?bo_table=%s&wr_id=%d&no=1", conf.Site, s.Category, i.ID)
-			magnet, err := getMagnet(link)
+			magnet, err := getRedirectLink(link)
 			if err != nil {
 				continue
 			}

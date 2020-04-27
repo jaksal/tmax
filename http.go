@@ -3,14 +3,11 @@ package main
 import (
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/http/cookiejar"
-	"strconv"
-	"strings"
 	"time"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 var client *http.Client
@@ -37,17 +34,12 @@ func init() {
 type Item struct {
 	ID    int
 	Title string
-	// Link  string
+	Link  string
 }
 
-func getList(site string) ([]*Item, error) {
+func getList(site string, parse func(io.Reader) ([]*Item, error)) ([]*Item, error) {
 
-	req, err := http.NewRequest("GET", site, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	res, err := client.Do(req)
+	res, err := client.Get(site)
 	if err != nil {
 		return nil, err
 	}
@@ -58,33 +50,26 @@ func getList(site string) ([]*Item, error) {
 		return nil, fmt.Errorf("status code error %d %s", res.StatusCode, res.Status)
 	}
 
-	// Load the HTML document
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	var result []*Item
-	doc.Find(".list-item").Each(func(i int, s *goquery.Selection) {
-		// For each item found, get the band and title
-		//id, _ := strconv.Atoi(s.Find(".wr-num").Text())
-		link, _ := s.Find(".wr-subject > a").Attr("href")
-		id, _ := strconv.Atoi(link[strings.LastIndex(link, "/")+1:])
-
-		title := strings.TrimSpace(s.Find(".wr-subject > a").Text())
-
-		result = append(result, &Item{
-			ID:    id,
-			Title: title,
-			//Link"," link,
-		})
-	})
-
-	return result, nil
+	return parse(res.Body)
 }
 
-func getMagnet(site string) (string, error) {
+func getBody(site string, parse func(io.Reader) (string, error)) (string, error) {
+
+	res, err := client.Get(site)
+	if err != nil {
+		return "", err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		log.Println("status code error", res.StatusCode, res.Status)
+		return "", fmt.Errorf("status code error %d %s", res.StatusCode, res.Status)
+	}
+
+	return parse(res.Body)
+}
+
+func getRedirectLink(site string) (string, error) {
 	//log.Println("get magnet", site)
 
 	res, err := client.Get(site)

@@ -1,11 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-	"testing"
-)
-
+/*
 const site = "https://torrentmax.gg"
 
 func TestGetList(t *testing.T) {
@@ -38,3 +33,4 @@ func TestParseLink(t *testing.T) {
 	t.Log(link[strings.LastIndex(link, "/")+1:])
 
 }
+*/

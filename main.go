@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/natefinch/lumberjack.v2"
 )
@@ -34,7 +35,15 @@ func main() {
 	if err := initTransmission(conf.Transmission.URL, conf.Transmission.UserID, conf.Transmission.Passwd); err != nil {
 		log.Fatal(err)
 	}
-
-	tmaxWork(conf)
 	checkState()
+
+	switch {
+	case strings.Contains(conf.Site, "torrentmax"):
+		torrentmaxWork(conf)
+	case strings.Contains(conf.Site, "torrentqq"):
+		torrentqqWork(conf)
+	default:
+		log.Fatal("not found torrentsite", conf.Site)
+	}
+
 }
